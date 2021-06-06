@@ -22,7 +22,7 @@
           计算状态： {{ message }}
         </b-col>
         <b-col v-if="result != null">
-          预测热导率：{{ result }} W/mK
+          预测热导率：{{ result }} W·m<sup>-1</sup>·K<sup>-1</sup>
         </b-col>
       </b-row>
     </b-card>

@@ -5,6 +5,11 @@ Vue.use(VueRouter)
 
 const routes = [
   {
+    path: '/',
+    name: HTMLModElement,
+    component: () => import('../views/Home.vue')
+  },
+  {
     path: '/recognize',
     name: 'Recognize',
     component: () => import('../views/Recognize.vue')
