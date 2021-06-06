@@ -2,7 +2,7 @@
   <div class="status-bar text-center">
     <b-card :border-variant="connection.status">
       <b-row>
-        <b-col cols="2">
+        <b-col cols="3">
           <label for="recon">连接状态：</label>
           <b-badge :variant="connection.status" @click="conn()" id="recon" href="#">
             {{ connection.info }}

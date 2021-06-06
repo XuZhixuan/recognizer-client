@@ -25,19 +25,32 @@
           预测热导率：{{ result }} W·m<sup>-1</sup>·K<sup>-1</sup>
         </b-col>
       </b-row>
+      <b-modal cancel-disabled ref="run-modal" title="计算">
+        <Process v-for="process in processes" :key="process.id" :status="process.status" :message="process.message"></Process>
+      </b-modal>
     </b-card>
   </div>
 </template>
 
 <script>
+import Process from '@/components/recognizer/Process.vue'
+
 export default {
   name: 'Recognize',
+  components: {
+    Process
+  },
   data () {
     return {
       image: null,
       base64: '',
       result: null,
-      message: '就绪'
+      message: '就绪',
+      processes: [
+        { id: 0, status: 'padding', message: '上传图片' },
+        { id: 1, status: 'padding', message: '计算' },
+        { id: 2, status: 'padding', message: '预测热导率：' }
+      ]
     }
   },
   watch: {
@@ -57,12 +70,29 @@ export default {
       reader.onload = () => resolve(reader.result)
       reader.onerror = error => reject(error)
     }),
+    updateProcess (id, status = '', message = '') {
+      if (status) this.processes[id].status = status
+      if (message) this.processes[id].message = message
+    },
     calculate () {
       const vm = this
+      this.updateProcess(0, 'running')
+
+      if (!this.$socket.connected) {
+        this.message = '未连接！'
+        vm.updateProcess(0, 'error', '未连接')
+        this.$refs['run-modal'].show()
+        return
+      }
+
+      this.$refs['run-modal'].show()
 
       this.uploadImg().then(res => {
+        vm.updateProcess(0, 'done')
+        vm.updateProcess(1, 'running')
         vm.message = '正在计算！'
       }).catch(e => {
+        vm.updateProcess(0, 'error', '上传失败：' + e)
         vm.message = '上传出错！'
       })
     },
@@ -73,6 +103,8 @@ export default {
   mounted () {
     const vm = this
     this.sockets.subscribe('result', data => {
+      vm.updateProcess(1, 'done')
+      vm.updateProcess(2, 'done', '热导率：' + data)
       vm.message = '计算完成'
       vm.result = data
     })
